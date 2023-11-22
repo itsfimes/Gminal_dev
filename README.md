@@ -11,7 +11,7 @@
 - Minor bug fixes
 - Optimized code to be a lot more efficient
 
-### Beta 0.0.5 - Current stable release. Check it out [Here!] (https://github.com/ItzFimes/Gminal)
+### Beta 0.0.5 - Current stable release. Check it out [Here!](https://github.com/ItzFimes/Gminal)
 - Redesigned the UI
 - Added a few new commands
 - Updated the help menu
