@@ -5,7 +5,18 @@
 ### Beta 0.0.7 - Not out _yet_ but being actively worked on!
 - Added the reload command!   
 - Updated the help page.   
-- Dirchck is actually reliable now! 
+- Dirchck is actually reliable now!  
+
+### Beta 0.0.6
+- Minor bug fixes
+- Optimized code to be a lot more efficient
+
+### Beta 0.0.5 - Current stable release. Check it out [Here!] (https://github.com/ItzFimes/Gminal)
+- Redesigned the UI
+- Added a few new commands
+- Updated the help menu
+- Gminal now doesn't need to use the setup-storage command to delete stuff in directories!
+
 ### You still here? Well, let me show you around!
 
 Traveller, this is _Gminal!_ Gminal this is the _traveller_ I told you about.
