@@ -1,0 +1,8 @@
+
+if cmnd != "print" "help" "info" :
+        print("Error")
+        continue
+        import os
+        def clear():
+            os.system('cls')
+            
