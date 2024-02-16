@@ -7,9 +7,16 @@
 - Updated the help page.   
 - Dirchck is actually reliable now!  
 
-### Beta 0.0.6
+### Beta 0.0.6 
 - Minor bug fixes
-- Optimized code to be a lot more efficient
+- Optimized dirchck
+- Optimized startingdir
+- Removed a lot of unnecessary imports
+- Removed a lot of time.sleeps
+- Optimized basically every function
+- Logo drawing is a lot faster
+- Fixed an issue where Gminal randomly started running Fore.RESET commands
+- Removed some unnecessary code
 
 ### Beta 0.0.5 - Current stable release. Check it out [Here!](https://github.com/ItzFimes/Gminal)
 - Redesigned the UI
