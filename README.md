@@ -7,7 +7,7 @@
 - Updated the help page.   
 - Dirchck is actually reliable now!  
 
-### Beta 0.0.6 
+### Beta 0.0.6  - Current stable release. Check it out [Here!](https://github.com/ItzFimes/Gminal)
 - Minor bug fixes
 - Optimized dirchck
 - Optimized startingdir
@@ -18,7 +18,7 @@
 - Fixed an issue where Gminal randomly started running Fore.RESET commands
 - Removed some unnecessary code
 
-### Beta 0.0.5 - Current stable release. Check it out [Here!](https://github.com/ItzFimes/Gminal)
+### Beta 0.0.5
 - Redesigned the UI
 - Added a few new commands
 - Updated the help menu
