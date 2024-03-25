@@ -1,5 +1,5 @@
 # Dev version of Gminal
-## Hey there, traveller! If you are looking for the actual exe, please follow this link: [Official Gminal Repo](github.com/ItzFimes/Gminal)
+## Hey there, traveller! If you are looking for the actual exe, please follow this link: [Official Gminal Repo](https://www.github.com/ItzFimes/Gminal)
 ##
 ## --Updates!-- (scroll down for the actual readme)
 ### Beta 0.0.7 - Not out _yet_ but being actively worked on!
