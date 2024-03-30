@@ -44,4 +44,4 @@ To make a directory you can use `mkdir`.
 ![mkdir command](https://github.com/ItzFimes/Gminal_dev/assets/83063145/15e56603-914d-4c32-a398-989f1136ed9b)
 _Hey! Pssst._ _**-in a whispering voice-**_ Come closer. I'm going to tell you a little _secret_, but you will need to promise me that you won't tell anyone. If you want to give Gminal Jesus privileges, just say(type) `su` and press enter.  
 
-Well, it seems like my time is running out, so if you excuse me, I'm gonna go! **If you don't know something, don't be afraid to use the `help` command!**
+Well, it seems like my time is running out, so if you excuse me, I'm gonna go! **If you want to learn more, don't be afraid to use the `help` command!**
