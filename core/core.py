@@ -32,7 +32,7 @@ class CoreFunctionality:
         self.startingdir = os.getcwd()
         self.homedir = Path.home()
 
-    def load_commands(self, commands_dir='commands'):
+    def load_commands(self, commands_dir='commands', silent=False):
         """Dynamically load commands from the specified directory."""
         for file in os.listdir(commands_dir):
             if file.endswith('.py'):
@@ -41,7 +41,8 @@ class CoreFunctionality:
                     module = importlib.import_module(f'{commands_dir}.{module_name}')
                     if hasattr(module, 'execute'):
                         self.commands[module_name] = module.execute
-                        print(f"Command '{module_name}' loaded successfully.")
+                        if not silent:
+                            print(f"Command '{module_name}' loaded successfully.")
                 except Exception as e:
                     print(f"Failed to load command '{module_name}': {e}")
 
