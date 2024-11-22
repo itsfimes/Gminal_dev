@@ -1,0 +1,10 @@
+{
+  "name": "sample_package",
+  "version": "1.0",
+  "description": "A sample package for testing.",
+  "files": [{
+      "source": "time.py",
+      "destination": "commands/time.py"
+    }
+  ]
+}
