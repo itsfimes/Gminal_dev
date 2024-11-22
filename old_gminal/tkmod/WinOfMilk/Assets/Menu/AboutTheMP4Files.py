@@ -1,0 +1,7 @@
+print("So...")
+print("The mp4 files aren't in the game yet cuz i have no idea how tf i can import them")
+print("Btw if u know how to import them pls contact me on Instagram or Gmail")
+print("Instagram: itz_fimes")
+print("Gmail: fimesik@gmail.com")
+print("  ")
+input("That's all (Press enter to exit)")
