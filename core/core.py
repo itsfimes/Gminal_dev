@@ -31,6 +31,7 @@ class CoreFunctionality:
     """
         self.startingdir = os.getcwd()
         self.homedir = Path.home()
+        self.debug_mode = False
 
     def load_commands(self, commands_dir='commands', silent=False):
         """Dynamically load commands from the specified directory."""
@@ -58,12 +59,16 @@ class CoreFunctionality:
         """Process and execute commands from the task queue."""
         while not self.task_queue.empty():
             command_name, args = self.task_queue.get()
-            try:
-                # print(f"Executing '{command_name}'...")
-                # Call the command, passing 'self' as the first argument
+            if not self.debug_mode:
+                try:
+                    # print(f"Executing '{command_name}'...")
+                    # Call the command, passing 'self' as the first argument
+                    self.commands[command_name](self, *args)
+                except Exception as e:
+                    print(f"Error while executing '{command_name}': {e}")
+            else:
+                print(f"Executing {command_name} ({self.commands[command_name]}) with {args}")
                 self.commands[command_name](self, *args)
-            except Exception as e:
-                print(f"Error while executing '{command_name}': {e}")
 
     def quit_gminal(self):
         self.task_queue = None  # Just nukes the queue, might cause issues down the line, but it should be just fine for now.

@@ -13,6 +13,7 @@ from utils.print_utils import write_progress
 
 colorama.init(autoreset=True)
 
+
 class PackageNotFoundError(Exception):
     def __init__(self, message="package gone :c"):
         super(PackageNotFoundError, self).__init__(message)
@@ -27,12 +28,17 @@ class GminalPackageManager:
         self.core = core
 
     def _load_package_list(self):
-        packages = {}
+        packages = []
         with open(self.packagelist_path, 'r') as f:
             for line in f:
                 if line.strip() and '*' in line:
-                    name, url_template = line.split('*')
-                    packages[name.strip()] = url_template.strip()
+                    name, url, version = line.split('*')
+                    # packages[name.strip()] = url_template.strip(), version.strip()
+                    packages.append({
+                        "name": name,
+                        "url": url,
+                        "version": version
+                    })
         return packages
 
     def _load_installed_packages_list(self):
@@ -63,18 +69,19 @@ class GminalPackageManager:
 
         return packages
 
-    def get_package_by_name(self, name):
-        for package in self.installed_packages:
+    def get_package_by_name(self, name, list):
+        for package in list:
             if package['name'] == name:
                 return package
         return None
 
     def install_package(self, package_name):
-        if package_name not in self.packages:
+        package = self.get_package_by_name(package_name, self.packages)
+        if package is None:
             print(f"Package '{package_name}' not found!")
             raise PackageNotFoundError("Package not found in package list :c")
 
-        url = self.packages[package_name].replace('%p', package_name)
+        url = package["url"].replace('%p', package_name)
         print(f"Downloading {package_name} from {url}...")
 
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -133,7 +140,7 @@ class GminalPackageManager:
 
             with open(f"{self.core.startingdir}/utils/package_manager/installed_packages.gres", "a+") as f:
                 f.write(f"{package_name}*{package_info.get("version")}*"
-                        f"{package_info.get("description").replace("*","").replace("\n", " - ")}*"
+                        f"{package_info.get("description").replace("*", "").replace("\n", " - ")}*"
                         f"{"|".join(package_files)}\n")
 
             print(f"Done!")
@@ -141,7 +148,7 @@ class GminalPackageManager:
             self.core.load_commands(silent=True)
 
     def uninstall_package(self, package_name):
-        package = self.get_package_by_name(package_name)
+        package = self.get_package_by_name(package_name, self.installed_packages)
         if package is None:
             print(f'Package "{package_name}" not found in installed packages')
             if package_name in self.packages:
@@ -150,7 +157,8 @@ class GminalPackageManager:
             raise PackageNotFoundError("Package not found in installed packages list :c")
 
         print(f"{Fore.RED}Uninstalling{Fore.RESET} {package["name"]} version {package["version"]}")
-        print(f"Removing {len(package["paths"])} files..." if len(package["paths"]) > 1 else f"Removing {len(package["paths"])} file...")
+        print(f"Removing {len(package["paths"])} files..." if len(
+            package["paths"]) > 1 else f"Removing {len(package["paths"])} file...")
 
         for idx, path in enumerate(package["paths"]):
             os.system(f"sudo chmod 777 {path}")
@@ -173,7 +181,23 @@ class GminalPackageManager:
 
         print("Done!")
 
+    def list_packages(self, type="installed"):
+        if type == "installed":
+            total = 0
+            for package in self.installed_packages:
+                total += 1  # ik this is not efficient
+                print(
+                    f"{Fore.LIGHTCYAN_EX}{package["name"]}{Fore.RESET} | version: {Fore.LIGHTMAGENTA_EX}{package["version"]}")
+            print(f"Total of {total} packages")
 
+        if type == "available":
+            total = 0
+            for package in self.packages:
+                print(package[1])
+                total += 1
+                print(f"{Fore.LIGHTCYAN_EX}{package}{Fore.RESET} | version: {Fore.LIGHTMAGENTA_EX}{package}")
+
+            print(f"Total of {total} packages")
 
 # Example usage:
 # manager = GminalPackageManager()

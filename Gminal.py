@@ -26,10 +26,11 @@ def main():
 
     while True:
         shellicon = "# " if core.root_access else "$ "
+        debug_mode_icon = f"{Fore.RED}|debug| {Fore.RESET}" if core.debug_mode else ""
         if os.getcwd() == str(core.homedir):
-            terminalico = f"{Fore.CYAN}~{Fore.RESET} {shellicon}"
+            terminalico = f"{debug_mode_icon}{Fore.CYAN}~{Fore.RESET} {shellicon}"
         else:
-            terminalico = f"{Fore.CYAN}{os.getcwd()}{Fore.RESET} {shellicon}"
+            terminalico = f"{debug_mode_icon}{Fore.CYAN}{os.getcwd()}{Fore.RESET} {shellicon}"
         user_input = input(f"{terminalico}").strip()
         if user_input.lower() == 'exit':
             print("Exiting Gminal. Goodbye :3")
