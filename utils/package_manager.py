@@ -183,6 +183,7 @@ class GminalPackageManager:
 
     def list_packages(self, type="installed"):
         if type == "installed":
+            print(f"{Fore.MAGENTA}Installed{Fore.RESET} packages: ")
             total = 0
             for package in self.installed_packages:
                 total += 1  # ik this is not efficient
@@ -191,11 +192,12 @@ class GminalPackageManager:
             print(f"Total of {total} packages")
 
         if type == "available":
+            print(f"{Fore.MAGENTA}Available{Fore.RESET} packages: ")
             total = 0
             for package in self.packages:
-                print(package[1])
+                # print(package["name"])
                 total += 1
-                print(f"{Fore.LIGHTCYAN_EX}{package}{Fore.RESET} | version: {Fore.LIGHTMAGENTA_EX}{package}")
+                print(f"{Fore.LIGHTCYAN_EX}{package["name"]}{Fore.RESET} | version: {Fore.LIGHTMAGENTA_EX}{package["version"]}")
 
             print(f"Total of {total} packages")
 
