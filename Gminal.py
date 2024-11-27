@@ -31,7 +31,12 @@ def main():
             terminalico = f"{debug_mode_icon}{Fore.CYAN}~{Fore.RESET} {shellicon}"
         else:
             terminalico = f"{debug_mode_icon}{Fore.CYAN}{os.getcwd()}{Fore.RESET} {shellicon}"
-        user_input = input(f"{terminalico}").strip()
+        try:
+            user_input = input(f"{terminalico}").strip()
+        except KeyboardInterrupt:
+            print("\n Exiting Gminal. Goodbye :3")
+            core.quit_gminal()
+            break
         if user_input.lower() == 'exit':
             print("Exiting Gminal. Goodbye :3")
             core.quit_gminal()
