@@ -104,6 +104,9 @@ def execute(self, *args):
         else:  # If no more instructions were provided list the installed packages
             gpm.list_packages()
 
+    elif instruction == "update" or instruction == "-up":
+        gpm.update_package_lists()
+        print(f"{Fore.GREEN}Package list updated successfuly")
     else:
         raise Exception(f'Unknown instruction: {Fore.RED}"{instruction}"')
 

@@ -9,9 +9,34 @@ import tempfile
 import requests
 import colorama
 from colorama import Fore
-from utils.print_utils import write_progress
+from utils.print_utils import write_progress, tqdm_bar
+import subprocess
 
 colorama.init(autoreset=True)
+
+
+def sudo_exec(command):
+    if isinstance(command, str):
+        command = command.split(" ")
+
+    print(command, type(command))
+    try:
+        # Run the sudo command securely
+        result = subprocess.run(
+            command,
+            check=False,  # Don't raise an exception immediately
+            capture_output=True,  # Capture stdout and stderr
+        )
+
+        if result.returncode != 0:  # Non-zero return code indicates failure
+            # Check if the error was due to permission denial
+            if b"password" in result.stderr.lower():
+                raise PermissionError("Sudo prompt was cancelled or failed due to incorrect credentials.")
+            else:
+                raise PermissionError(f"Failed to sudo for {command}: {result.stderr.decode().strip()}")
+
+    except PermissionError as e:
+        raise Exception(f"Error: {e}")
 
 
 class PackageNotFoundError(Exception):
@@ -81,30 +106,27 @@ class GminalPackageManager:
             print(f"Package '{package_name}' not found!")
             raise PackageNotFoundError("Package not found in package list :c")
 
+        print("Requesting root")
+        sudo_exec(["sudo", "echo", '"root"'])  # Request root at the start, so we don't have to annoy the user later
+        # if os.geteuid() != 0:
+        #     raise PermissionError("Root privileges are required.")
+
         url = package["url"].replace('%p', package_name)
         print(f"Downloading {package_name} from {url}...")
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             tarball_path = os.path.join(tmp_dir, f"{package_name}.tar.gz")
-
             response = requests.get(url, stream=True)  # Stream the response for chunked downloading
-            total_size = int(response.headers.get('content-length', 0))  # Get total size from headers
-            chunk_size = 1024  # Define chunk size
-            task_name = "Downloading"
+            chunk_size = 512  # Define chunk size
 
             with open(tarball_path, 'wb') as f:
-                downloaded_size = 0
-                for chunk in response.iter_content(chunk_size=chunk_size):
-                    if chunk:  # Write the chunk if it's not empty
-                        f.write(chunk)
-                        downloaded_size += len(chunk)
-
-                        # Calculate progress percentage
-                        progress = (downloaded_size / total_size) * 100 if total_size else 100
-
-                        # Update the progress bar
-                        write_progress(task_name, int(progress))
-            print()  # Move to the next line after the progress bar
+                with tqdm_bar(total=int(response.headers.get('content-length', 0)), unit='B', unit_scale=True,
+                              desc="Downloading") as pbar:
+                    for chunk in response.iter_content(chunk_size=chunk_size):
+                        if chunk:  # Write the chunk if it's not empty
+                            f.write(chunk)
+                            # Update the tqdm progress bar
+                            pbar.update(len(chunk))
 
             # Extract the tarball
             with tarfile.open(tarball_path, 'r:gz') as tar:
@@ -130,14 +152,23 @@ class GminalPackageManager:
 
             package_files = []
             # Move files based on what is in "package.json"
-            for file_entry in package_info.get('files', []):
-                src = os.path.join(package_dir, file_entry['source'])
-                dest = str(os.path.join(self.core.startingdir, file_entry['destination']))
-                package_files.append(dest)
-                os.makedirs(os.path.dirname(dest), exist_ok=True)
-                shutil.move(src, dest)
-                os.system(f"sudo chmod 600 {dest}")
-
+            with tqdm_bar(package_info.get('files', []), desc="Processing files", unit="file") as pbar:
+                for file_entry in pbar:
+                    # if os.geteuid() != 0:  # Check root permissions for every file
+                    #     print(f"{Fore.RED}Lost root access, will ask again.")
+                    # Update tqdm description for the current file
+                    pbar.set_postfix(current_file=file_entry['source'])
+                    # Construct source and destination paths
+                    src = os.path.join(package_dir, file_entry['source'])
+                    dest = str(os.path.join(self.core.startingdir, file_entry['destination']))
+                    # Track the processed files
+                    package_files.append(dest)
+                    # Ensure the destination directory exists
+                    os.makedirs(os.path.dirname(dest), exist_ok=True)
+                    # Move the file to the destination
+                    shutil.move(src, dest)
+                    # Set permissions for the file
+                    sudo_exec(["sudo", "chmod", "600", dest])
             with open(f"{self.core.startingdir}/utils/package_manager/installed_packages.gres", "a+") as f:
                 f.write(f"{package_name}*{package_info.get("version")}*"
                         f"{package_info.get("description").replace("*", "").replace("\n", " - ")}*"
@@ -161,7 +192,7 @@ class GminalPackageManager:
             package["paths"]) > 1 else f"Removing {len(package["paths"])} file...")
 
         for idx, path in enumerate(package["paths"]):
-            os.system(f"sudo chmod 777 {path}")
+            sudo_exec(f"sudo chmod 777 {path}")
             if os.path.isfile(path) or os.path.islink(path):
                 os.remove(path)
             elif os.path.isdir(path):
@@ -197,9 +228,28 @@ class GminalPackageManager:
             for package in self.packages:
                 # print(package["name"])
                 total += 1
-                print(f"{Fore.LIGHTCYAN_EX}{package["name"]}{Fore.RESET} | version: {Fore.LIGHTMAGENTA_EX}{package["version"]}")
+                print(
+                    f"{Fore.LIGHTCYAN_EX}{package["name"]}{Fore.RESET} | version: {Fore.LIGHTMAGENTA_EX}{package["version"]}")
 
             print(f"Total of {total} packages")
+
+    def update_package_lists(self,
+                             package_list="https://raw.githubusercontent.com/ItzFimes/Gminal_dev/refs/heads/main/utils/package_manager/packagelist.gres"):
+        print("Updating package list!")
+        print(f"Using update link: {Fore.LIGHTCYAN_EX}{package_list}")
+        print("Downloading...")
+        response = requests.get(package_list, stream=True)
+        chunk_size = 512
+
+        with open(self.packagelist_path, "wb") as f:
+            with tqdm_bar(total=int(response.headers.get('content-length', 0)), unit='B', unit_scale=True,
+                              desc="Downloading") as pbar:
+                for chunk in response.iter_content(chunk_size=chunk_size):
+                    if chunk:  # Write the chunk if it's not empty
+                        f.write(chunk)
+                        # Update the tqdm progress bar
+                        pbar.update(len(chunk))
+
 
 # Example usage:
 # manager = GminalPackageManager()

@@ -1,10 +1,10 @@
 # Override the built-in print function with our custom one, yes I know this is cursed
 import builtins
 import sys
-
 import colorama
-from colorama import Fore, Back, Style  # Theoretically uuse
+from colorama import Fore, Back, Style  # Theoretically used
 import os
+from tqdm import tqdm
 
 colorama.init(autoreset=True)
 
@@ -21,6 +21,10 @@ def print(message="", style=None):
 
 def clean_screen():
     os.system("cls" if os.name == "nt" else "clear")
+
+
+def tqdm_bar(*args, **kwargs):
+    return tqdm(*args, **kwargs)
 
 
 def write_progress(task_name, progress):
