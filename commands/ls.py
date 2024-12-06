@@ -10,6 +10,8 @@ colorama.init(autoreset=True)
 def execute(self, directory=None):
     # Borrowed from old core
     files = os.listdir(directory)
+    if directory is None:
+        directory = os.getcwd()
     print(f"╭ {Fore.CYAN}{directory}")
     for item in files:
         color = get_file_color(item)

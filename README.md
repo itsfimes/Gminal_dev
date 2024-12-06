@@ -1,6 +1,6 @@
 # Dev version of Gminal
 ## Hey there, traveller! If you are looking for the actual exe, please follow this link: [Official Gminal Repo](https://www.github.com/ItzFimes/Gminal)
-##
+## (as of right now the dev version of Gminal(core 2.0) is not officially supported on Python 3.11 and lower. It might work, but I can't guarantee it)
 ## --Updates!-- (scroll down for the actual readme)
 ### Beta 0.0.7 - Not out _yet_ but being actively worked on!
 - Added the reload command!   
@@ -39,7 +39,7 @@ Great! You did it! Let me show you a few more filesystem commands!
 Use `cd` to change your directory! 
 ![cd command](https://github.com/ItzFimes/Gminal_dev/assets/83063145/0ec2caf5-9ac3-45a6-8e4a-eaa8467aa97a)  
 If you get angry at some directory, use `deldir` to delete a directory.
-![deldir command](https://github.com/ItzFimes/Gminal_dev/assets/83063145/07ebc261-d623-4059-8e92-09f39d451b9b)  
+![deldir command](https://github.com/ItzFimes/Gminal_dev/assets/83063145/07ebc261-d623-4059-8e92-09f39d451b9b) 
 To make a directory you can use `mkdir`.
 ![mkdir command](https://github.com/ItzFimes/Gminal_dev/assets/83063145/15e56603-914d-4c32-a398-989f1136ed9b)
 _Hey! Pssst._ _**-in a whispering voice-**_ Come closer. I'm going to tell you a little _secret_, but you will need to promise me that you won't tell anyone. If you want to give Gminal Jesus privileges, just say(type) `su` and press enter.  

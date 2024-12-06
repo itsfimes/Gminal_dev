@@ -11,8 +11,11 @@ version = "0.0.7"
 
 def main():
     # Initialize core functionality
+    print("Getting core")
     core = CoreFunctionality()
-    core.load_commands()
+    print("Loading commands")
+    core.load_commands(silent=True)
+    print(f"Welcome to {Fore.LIGHTCYAN_EX} Gminal{Fore.RESET}!")
 
     def get_core():
         return core

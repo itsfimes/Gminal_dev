@@ -6,6 +6,8 @@ from utils.print_utils import print
 import colorama
 from colorama import Fore, Back, Style
 from pathlib import Path
+import shutil
+import subprocess
 
 colorama.init(autoreset=True)
 
@@ -34,18 +36,39 @@ class CoreFunctionality:
         self.debug_mode = False
 
     def load_commands(self, commands_dir='commands', silent=False):
-        """Dynamically load commands from the specified directory."""
-        for file in os.listdir(commands_dir):
-            if file.endswith('.py'):
-                module_name = file[:-3]
-                try:
-                    module = importlib.import_module(f'{commands_dir}.{module_name}')
-                    if hasattr(module, 'execute'):
-                        self.commands[module_name] = module.execute
+            """Dynamically load Python commands and system commands."""
+            # Load Python-based commands
+            for file in os.listdir(commands_dir):
+                if file.endswith('.py'):
+                    module_name = file[:-3]
+                    try:
+                        module = importlib.import_module(f'{commands_dir}.{module_name}')
+                        if hasattr(module, 'execute'):
+                            self.commands[module_name] = module.execute
+                            if not silent:
+                                print(f"Command '{module_name}' loaded successfully.")
+                    except Exception as e:
+                        print(f"Failed to load command '{module_name}': {e}")
+
+            # Load system commands
+            for path_dir in os.environ.get("PATH", "").split(os.pathsep):
+                if not os.path.isdir(path_dir):
+                    continue
+                for cmd in os.listdir(path_dir):
+                    if cmd not in self.commands and shutil.which(cmd):
+                        self.commands[cmd] = self._create_system_command(cmd)
                         if not silent:
-                            print(f"Command '{module_name}' loaded successfully.")
-                except Exception as e:
-                    print(f"Failed to load command '{module_name}': {e}")
+                            print(f"System command '{cmd}' registered successfully.")
+    def _create_system_command(self, cmd):
+        """Wrap a system command as a callable function."""
+        def command_executor(manager, *args):
+            try:
+                #result = subprocess.run([cmd, *args], check=True, text=True, capture_output=True)
+                #print(result.stdout)
+                os.system(f"{cmd} {" ".join(*args)}")
+            except subprocess.CalledProcessError as e:
+                print(f"Error executing '{cmd}': {e.stderr}")
+        return command_executor
 
     def enqueue_command(self, command_name, *args):
         """Add a command to the task queue."""
@@ -55,14 +78,13 @@ class CoreFunctionality:
         else:
             print(f"Command '{command_name}' not found. Please check the available commands.")
 
+
     def process_queue(self):
         """Process and execute commands from the task queue."""
         while not self.task_queue.empty():
             command_name, args = self.task_queue.get()
             if not self.debug_mode:
                 try:
-                    # print(f"Executing '{command_name}'...")
-                    # Call the command, passing 'self' as the first argument
                     self.commands[command_name](self, *args)
                 except Exception as e:
                     print(f"Error while executing '{command_name}': {e}")

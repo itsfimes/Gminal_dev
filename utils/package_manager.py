@@ -15,11 +15,13 @@ import subprocess
 colorama.init(autoreset=True)
 
 
-def sudo_exec(command):
+def sudo_exec(command, core=None):
     if isinstance(command, str):
         command = command.split(" ")
 
-    print(command, type(command))
+
+    if core is not None and core.debug_mode:
+        print(command, type(command))
     try:
         # Run the sudo command securely
         result = subprocess.run(
@@ -172,7 +174,7 @@ class GminalPackageManager:
             with open(f"{self.core.startingdir}/utils/package_manager/installed_packages.gres", "a+") as f:
                 f.write(f"{package_name}*{package_info.get("version")}*"
                         f"{package_info.get("description").replace("*", "").replace("\n", " - ")}*"
-                        f"{"|".join(package_files)}\n")
+                        f"{'|'.join(package_files)}\n")
 
             print(f"Done!")
             print("Reloading commands")
@@ -187,9 +189,9 @@ class GminalPackageManager:
                 print(f"If yes, just copy-paste this command :3 {Fore.MAGENTA}gpm -i {package_name}")
             raise PackageNotFoundError("Package not found in installed packages list :c")
 
-        print(f"{Fore.RED}Uninstalling{Fore.RESET} {package["name"]} version {package["version"]}")
-        print(f"Removing {len(package["paths"])} files..." if len(
-            package["paths"]) > 1 else f"Removing {len(package["paths"])} file...")
+        print(f"{Fore.RED}Uninstalling{Fore.RESET} {package['name']} version {package['version']}")
+        print(f"Removing {len(package['paths'])} files..." if len(
+            package["paths"]) > 1 else f"Removing {len(package['paths'])} file...")
 
         for idx, path in enumerate(package["paths"]):
             sudo_exec(f"sudo chmod 777 {path}")
