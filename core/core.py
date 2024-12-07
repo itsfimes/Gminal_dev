@@ -66,10 +66,14 @@ class CoreFunctionality:
                 #result = subprocess.run([cmd, *args], check=True, text=True, capture_output=True)
                 #print(result.stdout)
                 try:
-                    command_args = " ".join(*args)
-                except TypeError:
+                    command_args = " ".join([cmd, *args])
+                except TypeError as e:
+                    if self.debug_mode:
+                        print(e)
                     command_args = ""
-                os.system(f"{cmd} {command_args}")
+                if self.debug_mode:
+                    print(f"{command_args}")
+                os.system(f"{command_args}")
             except subprocess.CalledProcessError as e:
                 print(f"Error executing '{cmd}': {e.stderr}")
         return command_executor
