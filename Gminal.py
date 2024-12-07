@@ -3,6 +3,16 @@ from utils.print_utils import print, clean_screen
 import colorama
 from colorama import Fore, Back, Style
 import os
+import argparse
+
+parser = argparse.ArgumentParser(prog="Gminal Core V2")
+parser.add_argument("--before-load-dir", type=str, help="Sets what directory to cd into before start, usually the directory, that you have Gminal installed in")
+parser.add_argument("--after-load-dir", type=str, help="Sets what directory to cd into after start")
+args = parser.parse_args()
+
+after_load_dir = args.after_load_dir
+before_load_dir = args.before_load_dir
+
 
 colorama.init(autoreset=True)
 
@@ -10,13 +20,18 @@ version = "0.0.7"
 
 
 def main():
+    print(before_load_dir)
+    if before_load_dir is not None:
+        os.chdir(before_load_dir)
     # Initialize core functionality
     print("Getting core")
     core = CoreFunctionality()
     print("Loading commands")
     core.load_commands(silent=True)
     print(f"Welcome to {Fore.LIGHTCYAN_EX} Gminal{Fore.RESET}!")
-
+    print(after_load_dir)
+    if after_load_dir is not None:
+        os.chdir(after_load_dir)  # Chage the dir into provided directory, if it's provided
     def get_core():
         return core
 

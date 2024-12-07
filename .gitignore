@@ -2,3 +2,4 @@
 /.venv
 /default
 __pycache__/
+/dev_run.sh
