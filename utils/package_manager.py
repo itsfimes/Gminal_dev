@@ -251,6 +251,8 @@ class GminalPackageManager:
                         f.write(chunk)
                         # Update the tqdm progress bar
                         pbar.update(len(chunk))
+    
+    
 
 
 # Example usage:

@@ -2,7 +2,7 @@ import ctypes
 import queue
 import importlib
 import os
-from utils.print_utils import print
+from utils.print_utils import print, tqdm_bar
 import colorama
 from colorama import Fore, Back, Style
 from pathlib import Path
@@ -41,24 +41,39 @@ class CoreFunctionality:
             for file in os.listdir(commands_dir):
                 if file.endswith('.py'):
                     module_name = file[:-3]
-                    try:
+                    if not self.debug_mode:
+                        try:
+                            module = importlib.import_module(f'{commands_dir}.{module_name}')
+                            if hasattr(module, 'execute'):
+                                self.commands[module_name] = module.execute
+                                if not silent:
+                                    print(f"Command '{module_name}' loaded successfully.")
+                        except Exception as e:
+                            print(f"Failed to load command '{module_name}': {e}")
+                    else:
                         module = importlib.import_module(f'{commands_dir}.{module_name}')
                         if hasattr(module, 'execute'):
                             self.commands[module_name] = module.execute
                             if not silent:
                                 print(f"Command '{module_name}' loaded successfully.")
-                    except Exception as e:
-                        print(f"Failed to load command '{module_name}': {e}")
 
             # Load system commands
-            for path_dir in os.environ.get("PATH", "").split(os.pathsep):
+            paths = os.environ.get("PATH", "").split(os.pathsep)
+            total_files = sum(len(os.listdir(path_dir)) for path_dir in paths if os.path.isdir(path_dir))
+
+            progress_bar = tqdm_bar(total=total_files, disable=silent, desc="Registering System Commands", unit="cmd")
+            
+            for path_dir in paths:
                 if not os.path.isdir(path_dir):
                     continue
+
                 for cmd in os.listdir(path_dir):
+                    progress_bar.update(1)
                     if cmd not in self.commands and shutil.which(cmd):
                         self.commands[cmd] = self._create_system_command(cmd)
-                        if not silent:
-                            print(f"System command '{cmd}' registered successfully.")
+            
+            progress_bar.close()
+
     def _create_system_command(self, cmd):
         """Wrap a system command as a callable function."""
         def command_executor(manager, *args):
