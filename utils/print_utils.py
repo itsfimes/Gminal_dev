@@ -49,3 +49,7 @@ def multi_line_progress(write_progress, tasks):
         write_progress(task, progress)
         print()  # New line for each task
     sys.stdout.flush()
+
+def print_list_in_columns(data, items_per_row=5):
+    for i in range(0, len(data), items_per_row):
+        print(" ".join(f"{item:<15}" for item in data[i:i+items_per_row]))
