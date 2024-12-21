@@ -11,10 +11,12 @@ import atexit
 parser = argparse.ArgumentParser(prog="Gminal Core V2")
 parser.add_argument("--before-load-dir", type=str, help="Sets what directory to cd into before start, usually the directory, that you have Gminal installed in")
 parser.add_argument("--after-load-dir", type=str, help="Sets what directory to cd into after start")
+parser.add_argument("--wait-after-init", action="store_true", help="Waits for enter to be pressed after all modules and core have been initialized")
 args = parser.parse_args()
 
 after_load_dir = args.after_load_dir
 before_load_dir = args.before_load_dir
+wait_after_init = args.wait_after_init
 
 
 colorama.init(autoreset=True)
@@ -36,16 +38,17 @@ def main():
 
     print("Loading interface components")
     completor = CommandCompletion(commands=core.commands.keys())
-    historian = CommandHistory(history_file=f"{core.startingdir}/utils/command_history/history.gres")
+    historian = CommandHistory(core.startingdir, history_file=f"{core.startingdir}/utils/command_history/history.gres")
     atexit.register(historian.save_history)  # Using atexit since there's currently no global exit flag implementation
 
-    print(f"Welcome to {Fore.LIGHTCYAN_EX} Gminal{Fore.RESET}!")
+    print(f"Welcome to {Fore.LIGHTCYAN_EX}Gminal{Fore.RESET}!")
     print(after_load_dir)
     if after_load_dir is not None:
         os.chdir(after_load_dir)  # Chage the dir into provided directory, if it's provided
     def get_core():
         return core
-
+    if wait_after_init:
+        input("Waiting after init due to the --wait-after-init flag being passed \nPress enter to continue")
     clean_screen()
     print(core.welcome_text)
     print(f"    | CLI version {Fore.CYAN} {version}")
@@ -65,6 +68,11 @@ def main():
         except KeyboardInterrupt:
             print("\n Exiting Gminal. Goodbye :3")
             core.quit_gminal()
+            break
+        except EOFError:
+            print(f"EOFQUIT - {Fore.RED}core.quit_gminal won't be executed!{Fore.RESET}")
+            print("Goodbye :3")
+            print("loop exit")
             break
         if user_input.lower() == 'exit':
             print("Exiting Gminal. Goodbye :3")

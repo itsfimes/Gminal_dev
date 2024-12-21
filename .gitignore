@@ -3,3 +3,4 @@
 /default
 __pycache__/
 /dev_run.sh
+/utils/command_history/history.gres
