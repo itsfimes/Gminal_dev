@@ -7,4 +7,4 @@ def execute(self, directory):
     # elif directory == "##START":
     #     os.chdir(self.startingdir)
     # else:
-    os.chdir(directory.replace("##HOME", self.homedir).replace("##START", self.startingdir))
+    os.chdir(directory.replace("##HOME", str(self.homedir)).replace("##START", str(self.startingdir)))

@@ -4,6 +4,9 @@ import colorama
 from colorama import Fore, Back, Style
 import os
 import argparse
+from utils.command_completion import CommandCompletion
+from utils.command_history import CommandHistory
+import atexit
 
 parser = argparse.ArgumentParser(prog="Gminal Core V2")
 parser.add_argument("--before-load-dir", type=str, help="Sets what directory to cd into before start, usually the directory, that you have Gminal installed in")
@@ -23,11 +26,19 @@ def main():
     print(before_load_dir)
     if before_load_dir is not None:
         os.chdir(before_load_dir)
+
     # Initialize core functionality
     print("Getting core")
     core = CoreFunctionality()
+
     print("Loading commands")
     core.load_commands(silent=True)
+
+    print("Loading interface components")
+    completor = CommandCompletion(commands=core.commands.keys())
+    historian = CommandHistory(history_file=f"{core.startingdir}/utils/command_history/history.gres")
+    atexit.register(historian.save_history)  # Using atexit since there's currently no global exit flag implementation
+
     print(f"Welcome to {Fore.LIGHTCYAN_EX} Gminal{Fore.RESET}!")
     print(after_load_dir)
     if after_load_dir is not None:
