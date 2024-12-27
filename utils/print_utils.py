@@ -11,14 +11,21 @@ from tqdm import tqdm
 colorama.init(autoreset=True)
 
 
-def print(message="", style=None):
+def print(message="", style=None, condition=None, false_condition=None):
     """Customizable print function for Gminal."""
-    if style == 'bold':
-        builtins.print(f"\033[1m{message}\033[0m")  # ANSI escape code for bold text
-    elif style == 'underline':
-        builtins.print(f"\033[4m{message}\033[0m")  # ANSI escape code for underline
-    else:
-        builtins.print(f"{message}")  # Default style
+    if condition is not None and false_condition is not None:
+        builtins.print("[utils.print_utils.print] INVALID CONDITIONS SET. You can either set a false_condition or a condition, but not both at the same time.")
+        return "Unraised exception: InvalidConditionsException"
+    
+    
+
+    if condition is True or false_condition is False or condition is None and false_condition is None:
+        if style == 'bold':
+            builtins.print(f"\033[1m{message}\033[0m")  # ANSI escape code for bold text
+        elif style == 'underline':
+            builtins.print(f"\033[4m{message}\033[0m")  # ANSI escape code for underline
+        else:
+            builtins.print(f"{message}")  # Default style
 
 
 def clean_screen():
