@@ -10,35 +10,12 @@ import requests
 import colorama
 from colorama import Fore
 from utils.print_utils import write_progress, tqdm_bar
+from utils.su_manager import SuperUserManager
 import subprocess
 
 colorama.init(autoreset=True)
 
 
-def sudo_exec(command, core=None):
-    if isinstance(command, str):
-        command = command.split(" ")
-
-
-    if core is not None and core.debug_mode:
-        print(command, type(command))
-    try:
-        # Run the sudo command securely
-        result = subprocess.run(
-            command,
-            check=False,  # Don't raise an exception immediately
-            capture_output=True,  # Capture stdout and stderr
-        )
-
-        if result.returncode != 0:  # Non-zero return code indicates failure
-            # Check if the error was due to permission denial
-            if b"password" in result.stderr.lower():
-                raise PermissionError("Sudo prompt was cancelled or failed due to incorrect credentials.")
-            else:
-                raise PermissionError(f"Failed to sudo for {command}: {result.stderr.decode().strip()}")
-
-    except PermissionError as e:
-        raise Exception(f"Error: {e}")
 
 
 class PackageNotFoundError(Exception):
@@ -53,6 +30,7 @@ class GminalPackageManager:
         self.packages = self._load_package_list()
         self.installed_packages = self._load_installed_packages_list()
         self.core = core
+        su_man = SuperUserManager(self.core)
 
     def _load_package_list(self):
         packages = []
@@ -109,7 +87,7 @@ class GminalPackageManager:
             raise PackageNotFoundError("Package not found in package list :c")
 
         print("Requesting root")
-        sudo_exec(["sudo", "echo", '"root"'])  # Request root at the start, so we don't have to annoy the user later
+        su_man.sudo_exec(["echo", '"root"'])  # Request root at the start, so we don't have to annoy the user later
         # if os.geteuid() != 0:
         #     raise PermissionError("Root privileges are required.")
 
@@ -170,7 +148,7 @@ class GminalPackageManager:
                     # Move the file to the destination
                     shutil.move(src, dest)
                     # Set permissions for the file
-                    sudo_exec(["sudo", "chmod", "600", dest])
+                    su_man.sudo_exec(["chmod", "600", dest])
             with open(f"{self.core.startingdir}/utils/package_manager/installed_packages.gres", "a+") as f:
                 f.write(f"{package_name}*{package_info.get("version")}*"
                         f"{package_info.get("description").replace("*", "").replace("\n", " - ")}*"
@@ -194,7 +172,7 @@ class GminalPackageManager:
             package["paths"]) > 1 else f"Removing {len(package['paths'])} file...")
 
         for idx, path in enumerate(package["paths"]):
-            sudo_exec(f"sudo chmod 777 {path}")
+            su_man.sudo_exec(f"chmod 777 {path}")
             if os.path.isfile(path) or os.path.islink(path):
                 os.remove(path)
             elif os.path.isdir(path):

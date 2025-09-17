@@ -8,6 +8,8 @@ def execute(core, *args):
         arg = command[0]
     except IndexError:
         arg = "Nope :<"
+    if core.root_access:
+        print("Already running as root. Executing a new shell anyway.")
     if arg == "sys" or arg == "-s":
         os.system("su")
     else:

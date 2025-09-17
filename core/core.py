@@ -1,25 +1,30 @@
 import ctypes
-import queue
+from queue import Queue
 import importlib
 import os
 from utils.print_utils import print, tqdm_bar
+from utils.su_manager import SuperUserManager
+from utils.modifier_stack import ModifierStack 
+from utils.decorators import decorate_all_methods
+from utils.debug import GminalCoreDebugger
 import colorama
-from colorama import Fore, Back, Style
+from colorama import Fore
 from pathlib import Path
 import shutil
-import subprocess
 
 colorama.init(autoreset=True)
 
+debugger = GminalCoreDebugger()
 
+@decorate_all_methods(debugger.debug_decorator)
 class CoreFunctionality:
     def __init__(self):
-        self.core_version = "0.0.7"
-        self.task_queue = queue.Queue()  # Queue to manage tasks
-        self.commands = {}
-        self.root_access = None
-        self.check_root()
-        self.welcome_text = Fore.LIGHTCYAN_EX + r"""
+        self.core_version: str = "0.0.8"
+        self.task_queue: Queue = Queue()  # Queue to manage tasks
+        self.commands: dict = {}
+        self.root_access: bool = False # placeholder
+        self.check_root() # overwrite root_access placeholder
+        self.welcome_text: str = Fore.LIGHTCYAN_EX + r"""
            ______               __                   __ 
           /      \             |  \                 |  \
          |  ▓▓▓▓▓▓\______ ____  \▓▓_______   ______ | ▓▓
@@ -31,9 +36,25 @@ class CoreFunctionality:
            \▓▓▓▓▓▓ \▓▓  \▓▓  \▓▓\▓▓\▓▓   \▓▓ \▓▓▓▓▓▓▓\▓▓
                                                         
     """
-        self.startingdir = os.getcwd()
+        self.startingdir: str = os.getcwd()
         self.homedir = Path.home()
-        self.debug_mode = False
+
+        self.debug_mode: bool = False
+        self.debugger = debugger
+
+        self.core_shell: bool = False
+        
+        self.su_man = SuperUserManager(self)
+        
+        self.parser_type: str = "default"
+        self.command_parser = None
+        self.modifier = ModifierStack()  # thingy that keeps track of current shell modifiers like debug mode :3
+        
+        self.host_running: bool = False  # controlled by the host component(usually a cli) :3
+                                    # False until the host component sets it to True - indicating that it finished init
+        
+        # Attach debugger to core
+        self.debugger.attach_core(self)
 
     def load_commands(self, commands_dir='commands', silent=False):
             """Dynamically load Python commands and system commands."""
@@ -52,6 +73,7 @@ class CoreFunctionality:
                             print(f"Failed to load command '{module_name}': {e}")
                     else:
                         module = importlib.import_module(f'{commands_dir}.{module_name}')
+                        print(f"{commands_dir}.{module_name}")
                         if hasattr(module, 'execute'):
                             self.commands[module_name] = module.execute
                             if not silent:
@@ -76,22 +98,12 @@ class CoreFunctionality:
 
     def _create_system_command(self, cmd):
         """Wrap a system command as a callable function."""
-        def command_executor(manager, *args):
-            try:
-                #result = subprocess.run([cmd, *args], check=True, text=True, capture_output=True)
-                #print(result.stdout)
-                try:
-                    command_args = " ".join([cmd, *args])
-                except TypeError as e:
-                    if self.debug_mode:
-                        print(e)
-                    command_args = ""
-                if self.debug_mode:
-                    print(f"{command_args}")
-                os.system(f"{command_args}")
-            except subprocess.CalledProcessError as e:
-                print(f"Error executing '{cmd}': {e.stderr}")
-        return command_executor
+        def execute(core, # here cuz executor expects it
+                    *args):
+            command_args = " ".join([cmd, *args])
+            print(f"{command_args}", condition=self.debug_mode)
+            os.system(f"{command_args}")
+        return execute
 
     def enqueue_command(self, command_name, *args):
         """Add a command to the task queue."""
@@ -115,23 +127,24 @@ class CoreFunctionality:
                 print(f"Executing {command_name} ({self.commands[command_name]}) with {args}")
                 self.commands[command_name](self, *args)
 
-    def quit_gminal(self):
-        self.task_queue = None  # Just nukes the queue, might cause issues down the line, but it should be just fine for now.
-        quit(0)
+    def quit_gminal(self, let_host_terminate: bool = False):
+        self.host_running = False
+        if not let_host_terminate:
+            quit(0)
 
     def check_root(self):
         try:
             self.root_access = (os.getuid() == 0)
-        except AttributeError as e:
+        except AttributeError:
             self.root_access = ctypes.windll.shell32.IsUserAnAdmin() != 0
 
     def get_is_root(self):
         return self.root_access
 
-
-# Test, also makes my IDE not complain, about this file having no output, when executed
-if __name__ == "__main__":
-    core = CoreFunctionality()
-    core.load_commands()
-    core.enqueue_command('example_command', 'arg1', 'arg2')
-    core.process_queue()
+    def get_vars(self):
+        # TODO: Implement getting interface vars
+        access = self.su_man.sudo_check()
+        if access:
+            return globals().copy(), {key: value for key, value in self.__dict__.items() if key != "commands"}
+        else:
+            return "Superuser check failed for getting core variables"

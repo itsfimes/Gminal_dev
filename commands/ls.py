@@ -7,7 +7,7 @@ import colorama
 colorama.init(autoreset=True)
 
 
-def execute(self, directory=None):
+def execute(self, directory:str= None):
     # Borrowed from old core
     files = os.listdir(directory)
     files.sort()
@@ -17,3 +17,5 @@ def execute(self, directory=None):
     for item in files:
         color = get_file_color(item, os.getcwd())
         print(Fore.RESET + color + "| " + item)
+    if files == []:
+        print(f"{Fore.LIGHTMAGENTA_EX} nothing to see here :p")

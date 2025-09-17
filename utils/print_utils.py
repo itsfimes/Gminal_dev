@@ -1,25 +1,16 @@
 # Override the built-in print function with our custom one, yes I know this is cursed
 import builtins
 import sys
-import colorama
-from colorama import Fore, Back, Style  # Theoretically used
 import os
 from tqdm import tqdm
 
 
-
-colorama.init(autoreset=True)
-
-
-def print(message="", style=None, condition=None, false_condition=None):
+def print(message="", 
+          style: str = "", 
+          condition: bool = True):
     """Customizable print function for Gminal."""
-    if condition is not None and false_condition is not None:
-        builtins.print("[utils.print_utils.print] INVALID CONDITIONS SET. You can either set a false_condition or a condition, but not both at the same time.")
-        return "Unraised exception: InvalidConditionsException"
-    
-    
 
-    if condition is True or false_condition is False or condition is None and false_condition is None:
+    if condition is True:
         if style == 'bold':
             builtins.print(f"\033[1m{message}\033[0m")  # ANSI escape code for bold text
         elif style == 'underline':

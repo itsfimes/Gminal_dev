@@ -1,6 +1,9 @@
 /.idea
 /.venv
-/default
+/.vscode
 __pycache__/
+
 /dev_run.sh
+/shellinput.conf
 /utils/command_history/history.gres
+
