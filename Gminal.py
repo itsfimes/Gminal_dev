@@ -45,7 +45,7 @@ def main():
     core.load_commands(silent=True)
 
     print("Loading interface components", condition=not silent_startup)
-    CommandCompletion(commands=core.commands.keys())
+    CommandCompletion(commands=core.commands.keys(), enable_path_completion=True)
     os.makedirs(f"{core.startingdir}/utils/command_history", exist_ok=True)  # make sure that history dir exists :3
     historian = CommandHistory(f"{core.startingdir}/utils/command_history/gminal_history.txt")
     shell_input_constructor = ShellInputConstructor(core)

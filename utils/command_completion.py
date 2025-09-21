@@ -1,57 +1,62 @@
 import readline
 import os
-from pathlib import Path
 
 class CommandCompletion:
-    def __init__(self, commands, history_file='command_history/gminal_history.txt'):
-        self.commands = commands
-        self.history_file = Path(history_file)
-        self.load_history()
-        
-        readline.set_completer(self.complete)
+    def __init__(self, commands=None, enable_path_completion=True):
+        self.commands = commands or []
+        self.enable_path_completion = enable_path_completion
+        self.matches = []
+
+        delimiters = readline.get_completer_delims()
+        delimiters = delimiters.replace("/", "").replace("-", "")
+        readline.set_completer_delims(delimiters)
+
+        readline.set_completer(self._complete)
         readline.parse_and_bind("tab: complete")
 
-    def load_history(self):
-        if self.history_file.exists():
-            try:
-                readline.read_history_file(self.history_file)
-            except Exception:
-                pass  # Ignore errors if the history file is empty or corrupted
+    def _complete(self, text, state):
+        """
+        The thingy that generates the completions :3
+        """
+        # check if we're completing a path :3
+        if self.enable_path_completion and ("/" in text or text.startswith(".")):
+            return self._complete_path(text, state) # when completing paths only return paths and files as matches ><
 
-    def get_history_matches(self, text):
-        matches = []
-        for i in range(readline.get_current_history_length()):
-            entry = readline.get_history_item(i + 1)
-            if entry and entry.startswith(text) and entry not in matches:
-                matches.append(entry)
-        return matches
+        # only generate matches if this is the first time this text has been here :3
+        elif state == 0:
+            self.matches = [cmd for cmd in self.commands if cmd.startswith(text)]
+            self.matches.append(self.check_for_files(text)) # include files in command matches :3
 
-    def complete(self, text, state):
-        matches = []
+        return self.matches[state] if state < len(self.matches) else None
 
-        # Command completions
-        matches.extend([cmd for cmd in self.commands if cmd.startswith(text)])
-
-        # File completions (supports full/partial paths)
+    def _complete_path(self, text, state):
+        """
+        Generate completions for paths ><
+        """
+        # expand user (~) and get directory + partial filename
         expanded = os.path.expanduser(text)
-        dir_part, partial = os.path.split(expanded)
-        if dir_part == "":
-            dir_part = "."  # Use current directory if no path part
+        dirname = os.path.dirname(expanded) or "."
+        prefix = os.path.basename(expanded)
 
         try:
-            files = os.listdir(dir_part)
-            for f in files:
-                if f.startswith(partial):
-                    full_path = os.path.join(dir_part, f)
-                    if os.path.isdir(full_path):
-                        full_path += os.sep
-                    # Reconstruct with original user tilde if needed
-                    display_path = os.path.join(text[:text.rfind(partial)], f)
-                    matches.append(display_path)
-        except Exception:
-            pass  # Ignore invalid paths
+            files = os.listdir(dirname)
+        except FileNotFoundError:
+            return None
+        matches = []
+        for f in files:
+            if f.startswith(prefix):
+                full_path = os.path.join(dirname, f)
+                # add trailing slash for directories :>
+                if os.path.isdir(full_path):
+                    f += "/"
+                matches.append(os.path.join(os.path.dirname(text) or "", f))
 
-        # History completions
-        matches.extend(self.get_history_matches(text))
-
+        matches.sort()
         return matches[state] if state < len(matches) else None
+    
+    def check_for_files(self, text):
+        for file in os.listdir():
+            if file.startswith(text):
+                return file
+        
+        return None
