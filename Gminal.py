@@ -46,8 +46,10 @@ def main():
 
     print("Loading interface components", condition=not silent_startup)
     CommandCompletion(commands=core.commands.keys())
-    historian = CommandHistory(core.startingdir, history_file=f"{core.startingdir}/utils/command_history/history.gres")
+    os.makedirs(f"{core.startingdir}/utils/command_history", exist_ok=True)  # make sure that history dir exists :3
+    historian = CommandHistory(f"{core.startingdir}/utils/command_history/gminal_history.txt")
     shell_input_constructor = ShellInputConstructor(core)
+
     atexit.register(historian.save_history)  # Using atexit since there's currently no global exit flag implementation
     
     print("Loading parser", condition=not silent_startup)

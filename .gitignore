@@ -5,5 +5,5 @@ __pycache__/
 
 /dev_run.sh
 /shellinput.conf
-/utils/command_history/history.gres
+/utils/command_history/*
 
