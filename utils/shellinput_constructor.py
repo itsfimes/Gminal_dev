@@ -3,6 +3,7 @@
 import os
 import colorama
 from colorama import Fore
+import platform
 
 colorama.init(autoreset=True)
 
@@ -20,6 +21,8 @@ HELP_TEXT: str = """# Configuration for ShellInputConstructor
 #   - shellstatus // current shell modifications like debug mode and core-shell
 #   - path // current path, `~` if current dir == Path.home()
 #   - shellicon // `$` if running as a normal user, `#` if running as root
+#   - username // your username :3
+#   - hostname // your computer's name
 
 # colors and more parameters coming soon :3
 """
@@ -62,11 +65,15 @@ class ShellInputConstructor():
     def construct_shell_input(self, config_file_location: str = CONFIG_FILE) -> str:
         self.config_file = config_file_location 
         self.get_config()
+
         shell_status = []
         for status in self.core.modifier:
             shell_status.append(f"{status.color}|{status.display_name}|{Fore.RESET}")
         current_path = f"{Fore.CYAN}{' ~' if os.getcwd() == str(self.core.homedir) else ' ' + os.getcwd()}{Fore.RESET}"
         shell_icon = "# " if self.core.root_access else "$ " 
+        username = os.getlogin()
+        hostname = platform.node()
+
         shell_input: list[str] = self.config.split("|")
         for idx, item in enumerate(shell_input):
             match item:
@@ -77,7 +84,14 @@ class ShellInputConstructor():
                     item = current_path
 
                 case s if "shellicon" in s:
-                    item = shell_icon
+                    item = shell_icon 
+
+                case s if "username" in s:
+                    item = username
+
+                case s if "hostname" in s:
+                    item = hostname
+
             shell_input[idx] = item
 
 
