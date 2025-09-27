@@ -7,17 +7,37 @@ from tqdm import tqdm
 
 def print(message="", 
           style: str = "", 
-          condition: bool = True):
-    """Customizable print function for Gminal."""
+          condition: bool = True,
+          same_line_print: bool = False):
+    """the thingy that prints stuff :3
+        - styles: **bold**, <u>underline</u> (default = '')
+        - condition: A bool that must be true for text to print (default = True)
+        - same_line_print: whether to print the text to the same line"""
 
-    if condition is True:
-        if style == 'bold':
-            builtins.print(f"\033[1m{message}\033[0m")  # ANSI escape code for bold text
-        elif style == 'underline':
-            builtins.print(f"\033[4m{message}\033[0m")  # ANSI escape code for underline
+    # initialize persistent attribute on first use :3
+    if not hasattr(print, "last_message_length"):
+        print.last_message_length = 0 # type: ignore[attr-defined] - (make pyright and other lsps shut up about this definitely not cursed coding masterpiece)
+
+    message = str(message)
+
+    if condition:
+        match style:
+            case "bold":
+                message = f"\033[1m{message}\033[0m"
+            case "underline":
+                message = f"\033[4m{message}\033[0m"
+
+        if same_line_print:
+            if print.last_message_length > 0: # type: ignore[attr-defined]
+                sys.stdout.write("\033[F")  # move up one line # type: ignore[attr-defined]
+                sys.stdout.write(f"\033[{print.last_message_length}C")  # move cursor right # type: ignore[attr-defined]
+                sys.stdout.write(message + "\n")
+            sys.stdout.flush()
         else:
-            builtins.print(f"{message}")  # Default style
+            builtins.print(message)
 
+        # update persistent value :3
+        print.last_message_length = len(message) # type: ignore[attr-defined]
 
 def clean_screen():
     os.system("cls" if os.name == "nt" else "clear")
