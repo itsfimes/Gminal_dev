@@ -1,4 +1,3 @@
-import ctypes
 from queue import Queue
 import importlib
 import os
@@ -11,10 +10,14 @@ import colorama
 from colorama import Fore
 from pathlib import Path
 import shutil
+from typing import Any
 
 colorama.init(autoreset=True)
 
 debugger = GminalCoreDebugger()
+
+class PlaceholderClass:
+    pass
 
 @decorate_all_methods(debugger.debug_decorator)
 class CoreFunctionality:
@@ -47,14 +50,17 @@ class CoreFunctionality:
         self.su_man = SuperUserManager(self)
         
         self.parser_type: str = "default"
-        self.command_parser = None
+        self.command_parser: Any = PlaceholderClass()
         self.modifier = ModifierStack()  # thingy that keeps track of current shell modifiers like debug mode :3
         
         self.host_running: bool = False  # controlled by the host component(usually a cli) :3
-                                    # False until the host component sets it to True - indicating that it finished init
-        
+                                         # False until the host component sets it to True - indicating that it finished init
+        self.host_controller: Any = PlaceholderClass() # placeholder until a host component gets attached :3
+                                    # prefferably use core.attach_core when attaching
+
         # Attach debugger to core
         self.debugger.attach_core(self)
+    
 
     def load_commands(self, commands_dir='commands', silent=False):
             """Dynamically load Python commands and system commands."""
@@ -133,10 +139,8 @@ class CoreFunctionality:
             quit(0)
 
     def check_root(self):
-        try:
-            self.root_access = (os.getuid() == 0)
-        except AttributeError:
-            self.root_access = ctypes.windll.shell32.IsUserAnAdmin() != 0
+        """Update core's root flag :>"""
+        self.root_access = (os.getuid() == 0)
 
     def get_is_root(self):
         return self.root_access
