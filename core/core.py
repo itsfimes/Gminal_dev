@@ -21,7 +21,7 @@ class PlaceholderClass:
 
 @decorate_all_methods(debugger.debug_decorator)
 class CoreFunctionality:
-    def __init__(self):
+    def __init__(self) -> None:
         self.core_version: str = "0.0.8"
         self.task_queue: Queue = Queue()  # Queue to manage tasks
         self.commands: dict = {}
@@ -62,7 +62,7 @@ class CoreFunctionality:
         self.debugger.attach_core(self)
     
 
-    def load_commands(self, commands_dir='commands', silent=False):
+    def load_commands(self, commands_dir='commands', silent=False) -> None:
             """Dynamically load Python commands and system commands."""
             # Load Python-based commands
             for file in os.listdir(commands_dir):
@@ -111,7 +111,7 @@ class CoreFunctionality:
             os.system(f"{command_args}")
         return execute
 
-    def enqueue_command(self, command_name, *args):
+    def enqueue_command(self, command_name, *args) -> None:
         """Add a command to the task queue."""
         if command_name in self.commands:
             self.task_queue.put((command_name, args))
@@ -120,7 +120,7 @@ class CoreFunctionality:
             print(f"Command '{command_name}' not found. Please check the available commands.")
 
 
-    def process_queue(self):
+    def process_queue(self) -> None:
         """Process and execute commands from the task queue."""
         while not self.task_queue.empty():
             command_name, args = self.task_queue.get()
@@ -133,19 +133,19 @@ class CoreFunctionality:
                 print(f"Executing {command_name} ({self.commands[command_name]}) with {args}")
                 self.commands[command_name](self, *args)
 
-    def quit_gminal(self, let_host_terminate: bool = False):
+    def quit_gminal(self, let_host_terminate: bool = False) -> None:
         self.host_running = False
         if not let_host_terminate:
             quit(0)
 
-    def check_root(self):
+    def check_root(self) -> None:
         """Update core's root flag :>"""
         self.root_access = (os.getuid() == 0)
 
-    def get_is_root(self):
+    def get_is_root(self) -> bool:
         return self.root_access
 
-    def get_vars(self):
+    def get_vars(self) -> tuple[dict[str, Any], dict[str, Any]] | str:
         # TODO: Implement getting interface vars
         access = self.su_man.sudo_check()
         if access:

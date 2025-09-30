@@ -16,7 +16,7 @@ def split_commands(command_line: str):
     # Clean whitespace and ignore empty strings
     return [m.strip() for m in matches if m.strip()]
 
-def _parse(command_line: str) -> dict:
+def _parse(command_line: str) -> dict[str, list[str]]:
     result = {}
     commands = split_commands(command_line)
     for cmd in commands:

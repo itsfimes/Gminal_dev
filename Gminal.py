@@ -25,7 +25,7 @@ colorama.init(autoreset=True)
 version = "0.0.8"
 
 class GminalCli:
-    def __init__(self, init_args):
+    def __init__(self, init_args) -> None:
         print("Setting variables")
         self.ok_message = f"{Fore.GREEN} - Done"
 
@@ -78,7 +78,7 @@ class GminalCli:
 
 
     
-    def interactive_shell(self):
+    def interactive_shell(self) -> None:
         self.print_done() # interactive_shell handoff done :3
 
         print("Arming main loop core flag - core.host_running")
@@ -116,7 +116,7 @@ class GminalCli:
             except Exception as e:
                 print(f"Error occured after or while parsing >~< {Fore.RED}{e}{Fore.RESET}")
 
-    def print_done(self):
+    def print_done(self) -> None:
         print(self.ok_message, condition=not self.silent_startup or not self.silent_exit, same_line_print=True)
 
 if __name__ == "__main__":
