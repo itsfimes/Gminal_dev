@@ -1,0 +1,8 @@
+// A list of commands that get executed on start :3
+// Gminal.py or other gui hosts are responsible for executing this list by default
+// ------------
+// to get commands out of this just use utils.gres_parser ><
+// docs on how gres works are coming soon :3
+
+#! default
+echo "meow"

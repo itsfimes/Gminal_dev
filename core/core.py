@@ -6,6 +6,8 @@ from utils.su_manager import SuperUserManager
 from utils.modifier_stack import ModifierStack 
 from utils.decorators import decorate_all_methods
 from utils.debug import GminalCoreDebugger
+from utils.datatypes import GresParserCoreDatatype, HostCoreDatatype
+from utils.gres_parser import GresParser
 import colorama
 from colorama import Fore
 from pathlib import Path
@@ -18,6 +20,12 @@ debugger = GminalCoreDebugger()
 
 class PlaceholderClass:
     pass
+
+
+def get_starting_dir() -> str:
+    """A way to get startingdir without attaching to core"""
+
+    return str(Path(__file__).resolve().parents[1])
 
 @decorate_all_methods(debugger.debug_decorator)
 class CoreFunctionality:
@@ -55,8 +63,10 @@ class CoreFunctionality:
         
         self.host_running: bool = False  # controlled by the host component(usually a cli) :3
                                          # False until the host component sets it to True - indicating that it finished init
-        self.host_controller: Any = PlaceholderClass() # placeholder until a host component gets attached :3
-                                    # prefferably use core.attach_core when attaching
+        self.host_controller: HostCoreDatatype # empty until a host component gets attached :3
+        
+        # own gres parser instance so we don't have to borrow from a host :p 
+        self.gres_parser: GresParserCoreDatatype = GresParser(self) 
 
         # Attach debugger to core
         self.debugger.attach_core(self)
@@ -135,6 +145,8 @@ class CoreFunctionality:
 
     def quit_gminal(self, let_host_terminate: bool = False) -> None:
         self.host_running = False
+        print("Running exit scripts", condition=not self.host_controller.silent_exit)
+        self.gres_parser.execute_commands(f"{self.startingdir}/conf/exit.gres")
         if not let_host_terminate:
             quit(0)
 
@@ -145,10 +157,20 @@ class CoreFunctionality:
     def get_is_root(self) -> bool:
         return self.root_access
 
-    def get_vars(self) -> tuple[dict[str, Any], dict[str, Any]] | str:
-        # TODO: Implement getting interface vars
-        access = self.su_man.sudo_check()
-        if access:
-            return globals().copy(), {key: value for key, value in self.__dict__.items() if key != "commands"}
-        else:
-            return "Superuser check failed for getting core variables"
+    def get_vars(self) -> dict[str, Any]:
+        # TODO: Implement getting module vars
+        return {**globals().copy(), **{key: value for key, value in self.__dict__.items() if key != "commands"}}
+
+    def get_core(self):
+        return self
+    
+    def add_module(self, module_name: str) -> None:
+        try:
+            print(f"Importing {module_name}")
+            module = importlib.import_module(module_name)
+            globals()[module_name] = module 
+            print(f"{Fore.GREEN} - Done :3", same_line_print=True)
+        except ModuleNotFoundError:
+            print(f"Module '{module_name}' not found :c")
+
+

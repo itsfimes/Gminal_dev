@@ -8,6 +8,7 @@ from utils.command_completion import CommandCompletion
 from utils.command_history import CommandHistory
 from utils.parser_loader import load_command_parser
 from utils.shellinput_constructor import ShellInputConstructor
+from utils.gres_parser import GresParser
 import atexit
 
 parser = argparse.ArgumentParser(prog="Gminal.py")
@@ -20,6 +21,7 @@ parser.add_argument("--silent-exit", action="store_true", help="Disables the cut
 args = parser.parse_args()
 
 colorama.init(autoreset=True)
+
 
 
 version = "0.0.8"
@@ -61,10 +63,13 @@ class GminalCli:
         self.shell_input_constructor = ShellInputConstructor(self.core)
         self.print_done() 
 
-        print("Loading parser", condition=not self.silent_startup)
+        print("Loading parsers", condition=not self.silent_startup)
+        self.gres_parser = GresParser(self.core)
         load_command_parser(self.core)
         self.print_done()
-
+        
+        print("Running init scripts", condition=not self.silent_startup)
+        self.gres_parser.execute_commands(f"{self.core.startingdir}/conf/init.gres")
 
         print(f"Welcome to {Fore.LIGHTCYAN_EX}Gminal{Fore.RESET}!", condition=not self.silent_startup)
         

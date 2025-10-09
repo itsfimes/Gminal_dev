@@ -3,11 +3,12 @@ from utils.print_utils import print
 from utils.get_file_colors import get_file_color
 from colorama import Fore
 import colorama
+from typing import Optional
 
 colorama.init(autoreset=True)
 
 
-def execute(self, directory:str= None):
+def execute(core, directory: Optional[str] = None):
     # Borrowed from old core
     files = os.listdir(directory)
     files.sort()
