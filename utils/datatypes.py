@@ -21,6 +21,7 @@ class GresParserCoreDatatype(Protocol):
 
 class HostCoreDatatype(Protocol):
     silent_exit: bool
+    silent_startup: bool
     # more will be added soon + a less strict structure will be implemented :3
 # ---------
 
@@ -37,3 +38,10 @@ class GminalCoreGresParserDatatype(Protocol):
     def enqueue_command(self, *args: Any, **kwargs: Any) -> None: ...
     def process_queue(self) -> None: ...
 # -----------
+
+# debugger
+class CoreDebuggerDatatype(Protocol):
+    host_controller: HostCoreDatatype
+# ---------    
+    
+

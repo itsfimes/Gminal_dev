@@ -29,7 +29,7 @@ def get_starting_dir() -> str:
 
 @decorate_all_methods(debugger.debug_decorator)
 class CoreFunctionality:
-    def __init__(self) -> None:
+    def __init__(self, host_controller: HostCoreDatatype) -> None:
         self.core_version: str = "0.0.8"
         self.task_queue: Queue = Queue()  # Queue to manage tasks
         self.commands: dict = {}
@@ -63,7 +63,7 @@ class CoreFunctionality:
         
         self.host_running: bool = False  # controlled by the host component(usually a cli) :3
                                          # False until the host component sets it to True - indicating that it finished init
-        self.host_controller: HostCoreDatatype # empty until a host component gets attached :3
+        self.host_controller: HostCoreDatatype = host_controller # empty until a host component gets attached :3
         
         # own gres parser instance so we don't have to borrow from a host :p 
         self.gres_parser: GresParserCoreDatatype = GresParser(self) 
@@ -109,10 +109,10 @@ class CoreFunctionality:
                     progress_bar.update(1)
                     if cmd not in self.commands and shutil.which(cmd):
                         self.commands[cmd] = self._create_system_command(cmd)
-            
+
             progress_bar.close()
 
-    def _create_system_command(self, cmd):
+    def _create_system_command(self, cmd: str):
         """Wrap a system command as a callable function."""
         def execute(core, # here cuz executor expects it
                     *args):

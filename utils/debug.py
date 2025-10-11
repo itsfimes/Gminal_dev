@@ -1,5 +1,6 @@
 # Debugger decorator and other stuff :3
 from utils.print_utils import print
+from utils.datatypes import CoreDebuggerDatatype 
 from colorama import Fore
 
 class GminalCoreDebugger:
@@ -7,12 +8,11 @@ class GminalCoreDebugger:
         self.core = None
         self.ready: bool = False  # flag to signal if core is attached to debugger ><
         self.active: bool = False
-        print("Debugger waiting for core...")
 
-    def attach_core(self, core):
+    def attach_core(self, core: CoreDebuggerDatatype):
         self.core = core
         self.ready = True
-        print("Debugger attached to core :3", condition=not core.host_running)
+        print("Debugger attached to core :3", condition=not core.host_controller.silent_startup)
     
     def activate(self):
         if self.ready:

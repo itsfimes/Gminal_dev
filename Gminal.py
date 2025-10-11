@@ -28,7 +28,9 @@ version = "0.0.8"
 
 class GminalCli:
     def __init__(self, init_args) -> None:
-        print("Setting variables")
+        self.silent_startup = init_args.silent_startup  # set before everything else, cuz there's a print happening before others get set
+        
+        print("Setting variables", condition=not self.silent_startup)
         self.ok_message = f"{Fore.GREEN} - Done"
 
         # ik that loading these can be done dynamically, 
@@ -37,7 +39,6 @@ class GminalCli:
         self.before_load_dir = init_args.before_load_dir
         self.wait_after_init = init_args.wait_after_init
         self.no_welcome_text = init_args.no_welcome
-        self.silent_startup = init_args.silent_startup
         self.silent_exit = init_args.silent_exit
         self.print_done()
 
@@ -47,8 +48,7 @@ class GminalCli:
 
         # Initialize core functionality
         print("Getting core", condition=not self.silent_startup)
-        self.core = CoreFunctionality()
-        self.core.host_controller = self
+        self.core = CoreFunctionality(self)
         self.print_done()
 
         print("Loading commands", condition=not self.silent_startup)
@@ -86,7 +86,7 @@ class GminalCli:
     def interactive_shell(self) -> None:
         self.print_done() # interactive_shell handoff done :3
 
-        print("Arming main loop core flag - core.host_running")
+        print("Arming main loop core flag - core.host_running", condition=not self.silent_startup)
         self.core.host_running = True
         self.print_done()
 
@@ -122,7 +122,7 @@ class GminalCli:
                 print(f"Error occured after or while parsing >~< {Fore.RED}{e}{Fore.RESET}")
 
     def print_done(self) -> None:
-        print(self.ok_message, condition=not self.silent_startup or not self.silent_exit, same_line_print=True)
+        print(self.ok_message, condition=not (self.silent_startup or self.silent_exit), same_line_print=True)
 
 if __name__ == "__main__":
     GminalCli(args)
