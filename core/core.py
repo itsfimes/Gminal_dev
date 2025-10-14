@@ -166,10 +166,10 @@ class CoreFunctionality:
     
     def add_module(self, module_name: str) -> None:
         try:
-            print(f"Importing {module_name}")
+            print(f"Importing {module_name}", condition=self.debug_mode)
             module = importlib.import_module(module_name)
             globals()[module_name] = module 
-            print(f"{Fore.GREEN} - Done :3", same_line_print=True)
+            print(f"{Fore.GREEN} - Done :3", condition=self.debug_mode, same_line_print=True)
         except ModuleNotFoundError:
             print(f"Module '{module_name}' not found :c")
 

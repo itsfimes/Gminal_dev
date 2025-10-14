@@ -39,7 +39,7 @@ def _parse(core, command: str) -> None:
             obj = getattr(globals()['core'], first_part, None)
 
         # 3. Try importing module from project directory
-        if obj is None:
+        if obj is None and first_part != "":
             print(f"Project directory resolve for {first_part}", condition=core.debug_mode)
             sys.path.insert(0, PROJECT_DIR)
             try:
@@ -118,7 +118,7 @@ def _parse(core, command: str) -> None:
             else:
                 setattr(core, var_location, value)
 
-            print(f"Set {var_location} = {value}")
+            print(f"Set {var_location} = {value}", condition=core.debug_mode)
             return
 
         # function call: func(args)
