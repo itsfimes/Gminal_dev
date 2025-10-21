@@ -3,9 +3,9 @@ import builtins
 import sys
 import os
 from tqdm import tqdm
+from typing import Any
 
-
-def print(message="", 
+def print(message: Any = "", 
           style: str = "", 
           condition: bool = True,
           same_line_print: bool = False):
